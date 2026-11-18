@@ -1,32 +1,34 @@
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 # china-geojson
 
-中国省市区县 GeoJSON 地图数据（含全国/省/市/区县四级，可直接用于 ECharts）。
+China province / city / district GeoJSON map data (4 levels: national, province, city, district), ready for ECharts.
 
-## 数据内容
+## Data Layout
 
-目录按行政区划层级归类，需要某个省的数据直接复制对应的省文件夹即可：
+Data is organized by administrative hierarchy — to use one province's data, just copy its folder:
 
 ```
 data/
-  china.json                      全国地图（含各省边界）
-  location.json                   全国区划代码 + 中心点坐标
-  110000_北京市/
-    110000_北京市.json            省级地图（含下级边界）
-    110101_东城区.json            区县边界（直辖市/港澳的区划直接挂在省下）
-  440000_广东省/
-    440000_广东省.json            省级地图（含各市边界）
-    440100_广州市/
-      440100_广州市.json          市级地图（含各区县边界）
-      440103_荔湾区.json          区县自身边界
+  china.json                      National map (with all province boundaries)
+  location.json                   All adcodes + center/centroid coordinates
+  110000_北京市/                   Beijing
+    110000_北京市.json             Province-level map (with child boundaries)
+    110101_东城区.json             District boundary (municipalities/SAARs attach directly to province)
+  440000_广东省/                   Guangdong
+    440000_广东省.json             Province-level map (with city boundaries)
+    440100_广州市/                  Guangzhou
+      440100_广州市.json           City-level map (with district boundaries)
+      440103_荔湾区.json           Liwan District boundary
 ```
 
-- 文件/文件夹名为 `{adcode}_{名称}`，`adcode` 为 6 位行政区划代码
-- 省级、市级 `xxx.json` 为含子区域的完整地图，可注册到 ECharts 直接按层级下钻
-- 行政区划代码、名称、center/centroid 坐标集中在 `location.json`，用于定位/标点
+- Files/folders are named `{adcode}_{name}`, where `adcode` is the 6-digit administrative division code
+- Province/city-level JSON files contain child boundaries — register them in ECharts for drill-down maps
+- `location.json` holds adcodes, names, and center/centroid coordinates for marking points on maps
 
-## 使用
+## Usage
 
-### ECharts 注册地图
+### Register a map in ECharts
 
 ```js
 // echarts 5
@@ -37,22 +39,22 @@ fetch('data/110000_北京市/110000_北京市.json')
   });
 ```
 
-### 重新生成数据
+### Regenerate the data
 
-脚本仅依赖 Python 标准库，零第三方依赖：
+The script uses only the Python standard library — zero third-party dependencies:
 
 ```bash
 python download_geojson.py
 ```
 
-特性：
+Features:
 
-- **并发下载**（默认 20 线程，可通过脚本内 `MAX_WORKERS` 调整）
-- 优先请求 DataV **v3** 接口，多次失败自动降级到 v2 地址
-- 超时自动重试（默认 5 次），失败记录到 `log/Error.txt`
-- **断点续传**：已存在的文件自动跳过，中断后重跑即可继续
-- 结束时汇总失败清单，重跑脚本即可补齐
+- **Concurrent downloads** (5 threads by default, adjust `MAX_WORKERS` in the script)
+- Prefers the DataV **v3** API, falls back to v2 automatically; `_full` requests fall back to non-child variants on 404
+- Auto-retry on timeout (5 times by default), failures logged to `log/Error.txt`
+- **Resume support**: a done-list (`log/done.txt`) records completed files — finished items are skipped without sending requests
+- Failed files are summarized at the end; re-run the script to fill the gaps
 
-## 数据来源
+## Data Source
 
-[DataV.GeoAtlas](http://datav.aliyun.com/tools/atlas/)（阿里云），边界数据仅供参考，不作为法定行政区域依据。
+[DataV.GeoAtlas](http://datav.aliyun.com/tools/atlas/) (Alibaba Cloud). Boundary data is for reference only and should not be used as official administrative boundaries.
