@@ -13,18 +13,19 @@ data/
   china.json                      全国地图（含各省边界）
   location.json                   全国区划代码 + 中心点坐标
   110000_北京市/
-    110000_北京市.json            省级地图（含下级边界）
-    110101_东城区.json            区县边界（直辖市/港澳的区划直接挂在省下）
+    110000_full.json              省级地图（含下级边界）
+    110101.json                   东城区边界
+    ...
   440000_广东省/
-    440000_广东省.json            省级地图（含各市边界）
-    440100_广州市/
-      440100_广州市.json          市级地图（含各区县边界）
-      440103_荔湾区.json          区县自身边界
+    440000_full.json              省级地图（含各市边界）
+    440100_full.json              广州市地图（含各区县边界）
+    440103.json                   荔湾区边界
+    ...
 ```
 
-- 文件/文件夹名为 `{adcode}_{名称}`，`adcode` 为 6 位行政区划代码
-- 省级、市级 JSON 为含子区域的完整地图，可注册到 ECharts 直接按层级下钻
-- 行政区划代码、名称、center/centroid 坐标集中在 `location.json`，用于定位/标点
+- 每个省一个文件夹，市、区县文件全部平铺在省文件夹下
+- `{adcode}_full.json` 为省/市级地图（含子区域边界，来自 DataV 的 `_full` 接口）；`{adcode}.json` 为区县自身边界
+- `adcode` 为 6 位行政区划代码（名称、坐标可在 `location.json` 中查询）
 
 ## 使用
 
@@ -32,7 +33,7 @@ data/
 
 ```js
 // echarts 5
-fetch('data/110000_北京市/110000_北京市.json')
+fetch('data/110000_北京市/110000_full.json')
   .then(res => res.json())
   .then(data => {
     echarts.registerMap('beijing', data);

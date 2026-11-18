@@ -13,18 +13,19 @@ data/
   china.json                      National map (with all province boundaries)
   location.json                   All adcodes + center/centroid coordinates
   110000_北京市/                   Beijing
-    110000_北京市.json             Province-level map (with child boundaries)
-    110101_东城区.json             District boundary (municipalities/SAARs attach directly to province)
+    110000_full.json              Province-level map (with child boundaries)
+    110101.json                   Dongcheng District boundary
+    ...
   440000_广东省/                   Guangdong
-    440000_广东省.json             Province-level map (with city boundaries)
-    440100_广州市/                  Guangzhou
-      440100_广州市.json           City-level map (with district boundaries)
-      440103_荔湾区.json           Liwan District boundary
+    440000_full.json              Province-level map (with city boundaries)
+    440100_full.json              Guangzhou city-level map (with district boundaries)
+    440103.json                   Liwan District boundary
+    ...
 ```
 
-- Files/folders are named `{adcode}_{name}`, where `adcode` is the 6-digit administrative division code
-- Province/city-level JSON files contain child boundaries — register them in ECharts for drill-down maps
-- `location.json` holds adcodes, names, and center/centroid coordinates for marking points on maps
+- One folder per province; all its cities and districts are flattened inside
+- `{adcode}_full.json` — province/city-level maps containing child boundaries (served by DataV's `_full` API); `{adcode}.json` — district's own boundary
+- `adcode` is the 6-digit administrative division code (lookup names/coordinates in `location.json`)
 
 ## Usage
 
@@ -32,7 +33,7 @@ data/
 
 ```js
 // echarts 5
-fetch('data/110000_北京市/110000_北京市.json')
+fetch('data/110000_北京市/110000_full.json')
   .then(res => res.json())
   .then(data => {
     echarts.registerMap('beijing', data);

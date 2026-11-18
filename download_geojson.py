@@ -174,7 +174,12 @@ def dir_name(code):
 
 
 def file_name(code):
-    return "%s_%s.json" % (code, NAME_OF.get(code, code))
+    return "%s.json" % code
+
+
+def full_file_name(code):
+    """省级/市级文件来自 _full 接口（含子区域边界），文件名带 _full 标识"""
+    return "%s_full.json" % code
 
 
 def province_dir(code):
@@ -243,21 +248,19 @@ def build_tasks():
         pdir = os.path.join(DATA_DIR, province_dir(pcode))
         # 省级地图（含下级边界）；部分省份（如台湾）v3 无 _full 数据，降级为自身边界
         add_task([BASE_URL_V3 + pcode + "_full.json", BASE_URL_V3 + pcode + ".json"],
-                 os.path.join(pdir, file_name(pcode)))
+                 os.path.join(pdir, full_file_name(pcode)))
 
+        # 所有下级区划（市级、区县级）统一平铺在省文件夹下
         for child in INFOS[pcode].get("children", []):
             ccode = str(child["adcode"])
             if ccode in INFOS and INFOS[ccode].get("children"):
-                # 市级：市级地图 + 区县文件
-                cdir = os.path.join(pdir, dir_name(ccode))
                 add_task([BASE_URL_V3 + ccode + "_full.json", BASE_URL_V3 + ccode + ".json"],
-                         os.path.join(cdir, file_name(ccode)))
-                for gc in INFOS[ccode].get("children", []):
-                    gcode = str(gc["adcode"])
-                    add_task(BASE_URL_V3 + gcode + ".json", os.path.join(cdir, file_name(gcode)))
+                         os.path.join(pdir, full_file_name(ccode)))
             else:
-                # 直辖市/港澳等：区划直接挂在省下
                 add_task(BASE_URL_V3 + ccode + ".json", os.path.join(pdir, file_name(ccode)))
+            for sub in INFOS.get(ccode, {}).get("children", []):
+                gcode = str(sub["adcode"])
+                add_task(BASE_URL_V3 + gcode + ".json", os.path.join(pdir, file_name(gcode)))
 
     return tasks
 
